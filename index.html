@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 11 Ultimate Clone</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        
+        body, html { 
+            height: 100%; overflow: hidden; 
+            font-family: 'Segoe UI', sans-serif; background: black; color: white;
+        }
+
+        /* --- Ekrany Systemowe --- */
+        #boot-screen, #login-screen, #shutdown-screen {
+            position: fixed; inset: 0; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; z-index: 10000;
+        }
+        #boot-screen { background: black; }
+        #login-screen { 
+            background: url('https://wallpaper.forfun.com/fetch/70/70e83ab44b08fa76ad376182252d771f.jpeg') center/cover;
+            display: none; backdrop-filter: blur(20px); z-index: 9000;
+        }
+        #shutdown-screen { background: black; display: none; opacity: 0; transition: opacity 1s; z-index: 11000; }
+
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.2);
+            border-radius: 50%; border-top-color: white; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- Pulpit --- */
+        .desktop {
+            background: url('https://wallpaper.forfun.com/fetch/70/70e83ab44b08fa76ad376182252d771f.jpeg') center/cover;
+            height: 100vh; position: relative; display: none;
+        }
+
+        /* --- Animacje Okien --- */
+        .window {
+            position: absolute; min-width: 400px; 
+            background: rgba(255,255,255,0.85); backdrop-filter: blur(25px);
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.3);
+            display: none; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            color: black; overflow: hidden; z-index: 100;
+            transform: scale(0.7); opacity: 0;
+            transition: transform 0.2s cubic-bezier(0, 0, 0, 1.2), opacity 0.15s ease-out;
+        }
+        .window.active { display: flex; transform: scale(1); opacity: 1; }
+        .window.closing { transform: scale(0.85); opacity: 0; }
+
+        .window-header { padding: 12px; background: rgba(240,240,240,0.5); display: flex; justify-content: space-between; align-items: center; cursor: move; font-weight: 500; font-size: 13px; }
+        .close-win { cursor: pointer; width: 35px; height: 35px; text-align: center; line-height: 35px; border-radius: 4px; font-size: 18px; }
+        .close-win:hover { background: #e81123; color: white; }
+
+        /* --- Centrum Akcji (WiFi/Głośność) --- */
+        .action-center {
+            position: absolute; bottom: -500px; right: 12px; width: 360px;
+            background: rgba(243, 243, 243, 0.95); backdrop-filter: blur(20px);
+            border-radius: 12px; padding: 20px; z-index: 1001; color: black;
+            transition: bottom 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.2);
+        }
+        .action-center.active { bottom: 60px; }
+        .quick-settings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .setting-tile { background: white; padding: 15px; border-radius: 8px; text-align: center; font-size: 11px; cursor: pointer; border: 1px solid #ddd; }
+        .setting-tile.on { background: #0067c0; color: white; border-color: #0067c0; }
+        .sliders { display: flex; flex-direction: column; gap: 15px; }
+        .slider-row { display: flex; align-items: center; gap: 10px; }
+        input[type=range] { flex: 1; cursor: pointer; accent-color: #0067c0; }
+
+        /* --- Pasek Zadań --- */
+        .taskbar {
+            position: fixed; bottom: 0; width: 100%; height: 48px;
+            background: rgba(235, 243, 249, 0.85); backdrop-filter: blur(15px);
+            display: none; justify-content: space-between; align-items: center; padding: 0 12px; z-index: 1000;
+        }
+        .taskbar-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; }
+        .taskbar-center img { width: 28px; margin: 0 6px; cursor: pointer; transition: 0.2s; }
+        .taskbar-center img:hover { transform: scale(1.15); }
+        .taskbar-right { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 5px 10px; border-radius: 4px; transition: 0.2s; }
+        .taskbar-right:hover { background: rgba(255,255,255,0.4); }
+
+        /* Menu Start */
+        .start-menu {
+            position: absolute; bottom: -700px; left: 50%; transform: translateX(-50%);
+            width: 540px; height: 580px; background: rgba(243, 243, 243, 0.95);
+            border-radius: 12px; padding: 30px; z-index: 900; color: black;
+            transition: bottom 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .start-menu.active { bottom: 60px; }
+    </style>
+</head>
+<body onload="startBooting()">
+
+<div id="boot-screen">
+    <img src="https://img.icons8.com/color/144/windows-11.png" style="width:100px; margin-bottom:50px;">
+    <div class="spinner"></div>
+</div>
+
+<div id="login-screen">
+    <img src="https://img.icons8.com/fluent-systems-filled/200/user.jpg" style="width:120px; border-radius:50%; margin-bottom:20px; border: 2px solid white;">
+    <h2>Taras Buria</h2><br>
+    <button onclick="login()" style="padding:10px 30px; cursor:pointer; background:rgba(255,255,255,0.2); color:white; border:1px solid white; border-radius:4px;">Zaloguj</button>
+</div>
+
+<div id="shutdown-screen"><div class="spinner"></div><p>Zamykanie...</p></div>
+
+<div class="desktop" id="mainDesktop" onclick="closeAllPopups()">
+    
+    <div class="window" id="explorerWin" onclick="event.stopPropagation()">
+        <div class="window-header" onmousedown="dragElement(this)">
+            <span style="margin-left:10px;">Eksplorator plików</span>
+            <div class="close-win" onclick="closeWin('explorerWin')">×</div>
+        </div>
+        <div style="height:400px; background:white; padding:20px;">
+            <p>Moje dokumenty</p>
+            <hr style="margin:10px 0;">
+            <div style="display:flex; gap:20px; color:#0067c0;">
+                <div style="text-align:center;"><img src="https://img.icons8.com/color/48/folder-invoices.png"><br><span style="font-size:12px;">Projekty</span></div>
+                <div style="text-align:center;"><img src="https://img.icons8.com/color/48/image.png"><br><span style="font-size:12px;">Zdjęcia</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="window" id="musicWin" onclick="event.stopPropagation()">
+        <div class="window-header" onmousedown="dragElement(this)">
+            <span style="margin-left:10px;">YouTube Music</span>
+            <div class="close-win" onclick="closeWin('musicWin')">×</div>
+        </div>
+        <div style="background:#030303; color:white; padding:30px; text-align:center;">
+            <div style="width:180px; height:180px; margin:0 auto 15px; border-radius:8px; background:url('https://lh3.googleusercontent.com/B_W5qJN-FolhkLiIxsSoPA4Cc6GXaUFbKvsvF6897QbWmCsZpYyk9TROVH-2r6h3HQ-DpOc3LmleAWKU=w544-h544-l90-rj') center/cover;"></div>
+            <h3>phonk drift</h3>
+            <p style="color:#ff0000; margin-bottom:20px;">YT Music</p>
+            <button id="pBtn" onclick="togglePlay()" style="width:50px; height:50px; border-radius:50%; cursor:pointer; font-size:20px;">▶</button>
+        </div>
+    </div>
+
+    <div class="action-center" id="actionCenter" onclick="event.stopPropagation()">
+        <div class="quick-settings">
+            <div class="setting-tile on">WiFi<br><small>Połączono</small></div>
+            <div class="setting-tile on">Bluetooth<br><small>Wł.</small></div>
+            <div class="setting-tile">Tryb samolotowy</div>
+            <div class="setting-tile">Oszczędzanie</div>
+            <div class="setting-tile">Skupienie</div>
+            <div class="setting-tile">Nocne</div>
+        </div>
+        <div class="sliders">
+            <div class="slider-row"><span>🔆</span><input type="range" value="80"></div>
+            <div class="slider-row"><span>🔊</span><input type="range" value="50"></div>
+        </div>
+    </div>
+
+    <div class="start-menu" id="startMenu" onclick="event.stopPropagation()">
+        <p style="font-weight:600; margin-bottom:20px;">Przypięte aplikacje</p>
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:25px; text-align:center;">
+            <div onclick="openWin('explorerWin')" style="cursor:pointer;"><img src="https://img.icons8.com/color/48/folder-invoices.png" style="width:40px;"><br><span style="font-size:11px;">Pliki</span></div>
+            <div onclick="openWin('musicWin')" style="cursor:pointer;"><img src="https://img.icons8.com/color/48/youtube-music.png" style="width:40px;"><br><span style="font-size:11px;">YT Music</span></div>
+            <div><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Microsoft_Edge_logo_%282019%29.svg/48px-Microsoft_Edge_logo_%282019%29.svg.png" style="width:40px;"><br><span style="font-size:11px;">Edge</span></div>
+            <div><img src="https://img.icons8.com/color/48/python.png" style="width:40px;"><br><span style="font-size:11px;">Python</span></div>
+        </div>
+        <img src="https://img.icons8.com/fluent-systems-filled/200/shutdown.jpg" onclick="shutdownSystem()" style="position:absolute; bottom:30px; right:35px; width:22px; cursor:pointer;">
+    </div>
+</div>
+
+<nav class="taskbar" id="taskbar">
+    <div style="width: 150px;"></div>
+    <div class="taskbar-center">
+        <img src="https://img.icons8.com/color/48/windows-11.png" onclick="toggleStart(event)">
+        <img src="https://img.icons8.com/color/48/folder-invoices.png" onclick="openWin('explorerWin')">
+        <img src="https://img.icons8.com/color/48/youtube-music.png" onclick="openWin('musicWin')">
+    </div>
+    <div class="taskbar-right" onclick="toggleActionCenter(event)">
+        <span style="font-size:16px;">📶 🔊</span>
+        <div style="text-align:right; font-size:11px; line-height:1.2; margin-left:10px;">
+            <span id="clock-time">15:30</span><br><span id="clock-date">08.04.2026</span>
+        </div>
+    </div>
+</nav>
+
+<audio id="mAudio" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+
+<script>
+    function startBooting() { setTimeout(() => { document.getElementById('boot-screen').style.display='none'; document.getElementById('login-screen').style.display='flex'; }, 2000); }
+    function login() { document.getElementById('login-screen').style.display='none'; document.getElementById('mainDesktop').style.display='block'; document.getElementById('taskbar').style.display='flex'; setInterval(updateClock, 1000); }
+    
+    function dragElement(header) {
+        const win = header.parentElement;
+        header.onmousedown = (e) => {
+            let px = e.clientX - win.offsetLeft; let py = e.clientY - win.offsetTop;
+            document.onmousemove = (e) => { win.style.left = (e.clientX - px) + "px"; win.style.top = (e.clientY - py) + "px"; };
+            document.onmouseup = () => { document.onmousemove = null; };
+        };
+    }
+
+    function openWin(id) { 
+        const w = document.getElementById(id); 
+        w.style.display = 'flex'; 
+        setTimeout(() => w.classList.add('active'), 10);
+        closeAllPopups();
+    }
+
+    function closeWin(id) { 
+        const w = document.getElementById(id);
+        w.classList.add('closing');
+        w.classList.remove('active');
+        setTimeout(() => { w.style.display = 'none'; w.classList.remove('closing'); }, 200);
+        if(id==='musicWin') { document.getElementById('mAudio').pause(); document.getElementById('pBtn').innerText="▶"; }
+    }
+
+    function toggleStart(e) { e.stopPropagation(); document.getElementById('startMenu').classList.toggle('active'); document.getElementById('actionCenter').classList.remove('active'); }
+    function toggleActionCenter(e) { e.stopPropagation(); document.getElementById('actionCenter').classList.toggle('active'); document.getElementById('startMenu').classList.remove('active'); }
+    function closeAllPopups() { document.getElementById('startMenu').classList.remove('active'); document.getElementById('actionCenter').classList.remove('active'); }
+
+    function togglePlay() {
+        const a = document.getElementById('mAudio');
+        if (a.paused) { a.play(); document.getElementById('pBtn').innerText="⏸"; }
+        else { a.pause(); document.getElementById('pBtn').innerText="▶"; }
+    }
+
+    function shutdownSystem() { document.getElementById('shutdown-screen').style.display='flex'; setTimeout(() => document.getElementById('shutdown-screen').style.opacity = '1', 50); setTimeout(()=>location.reload(), 4000); }
+    
+    function updateClock() {
+        const n = new Date();
+        document.getElementById('clock-time').innerText = n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        document.getElementById('clock-date').innerText = n.toLocaleDateString();
+    }
+</script>
+</body>
+</html>

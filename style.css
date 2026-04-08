@@ -1,0 +1,58 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.desktop {
+    background: #001833 url('https://wallpaper.forfun.com/fetch/70/70e83ab44b08fa76ad376182252d771f.jpeg') no-repeat center center/cover;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    width: 100%;
+}
+/* Pasek zadań */
+.taskbar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px); /* Efekt rozmycia */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.taskbar-icons img {
+    width: 32px;
+    margin: 0 8px;
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.taskbar-icons img:hover {
+    transform: scale(1.15);
+}
+
+/* Menu Start */
+.start-menu {
+    position: absolute;
+    bottom: -600px; /* Ukryte na dole */
+    width: 500px;
+    height: 550px;
+    background: rgba(243, 243, 243, 0.85);
+    backdrop-filter: blur(20px);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: bottom 0.4s cubic-bezier(0.1, 0.7, 1.0, 0.1);
+    padding: 20px;
+}
+
+.start-menu.active {
+    bottom: 60px; /* Pokazuje się nad paskiem zadań */
+}
