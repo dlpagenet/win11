@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Windows 11 Ultimate Clone</title>
+    <title>Windows 11 Ultimate Clone - With Sound</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         
@@ -53,7 +53,7 @@
         .close-win { cursor: pointer; width: 35px; height: 35px; text-align: center; line-height: 35px; border-radius: 4px; font-size: 18px; }
         .close-win:hover { background: #e81123; color: white; }
 
-        /* --- Centrum Akcji (WiFi/Głośność) --- */
+        /* --- Centrum Akcji --- */
         .action-center {
             position: absolute; bottom: -500px; right: 12px; width: 360px;
             background: rgba(243, 243, 243, 0.95); backdrop-filter: blur(20px);
@@ -77,9 +77,7 @@
         }
         .taskbar-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; }
         .taskbar-center img { width: 28px; margin: 0 6px; cursor: pointer; transition: 0.2s; }
-        .taskbar-center img:hover { transform: scale(1.15); }
-        .taskbar-right { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 5px 10px; border-radius: 4px; transition: 0.2s; }
-        .taskbar-right:hover { background: rgba(255,255,255,0.4); }
+        .taskbar-right { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 5px 10px; border-radius: 4px; }
 
         /* Menu Start */
         .start-menu {
@@ -94,6 +92,10 @@
 </head>
 <body onload="startBooting()">
 
+<audio id="startupSound">
+    <source src="https://www.myinstants.com/media/sounds/windows-11-startup-sound-effect-57973.mp3" type="audio/mpeg">
+</audio>
+
 <div id="boot-screen">
     <img src="https://img.icons8.com/color/144/windows-11.png" style="width:100px; margin-bottom:50px;">
     <div class="spinner"></div>
@@ -101,7 +103,7 @@
 
 <div id="login-screen">
     <img src="https://img.icons8.com/fluent-systems-filled/200/user.jpg" style="width:120px; border-radius:50%; margin-bottom:20px; border: 2px solid white;">
-    <h2>Administrator</h2><br>
+    <h2>Taras Buria</h2><br>
     <button onclick="login()" style="padding:10px 30px; cursor:pointer; background:rgba(255,255,255,0.2); color:white; border:1px solid white; border-radius:4px;">Zaloguj</button>
 </div>
 
@@ -109,21 +111,6 @@
 
 <div class="desktop" id="mainDesktop" onclick="closeAllPopups()">
     
-    <div class="window" id="explorerWin" onclick="event.stopPropagation()">
-        <div class="window-header" onmousedown="dragElement(this)">
-            <span style="margin-left:10px;">Eksplorator plików</span>
-            <div class="close-win" onclick="closeWin('explorerWin')">×</div>
-        </div>
-        <div style="height:400px; background:white; padding:20px;">
-            <p>Moje dokumenty</p>
-            <hr style="margin:10px 0;">
-            <div style="display:flex; gap:20px; color:#0067c0;">
-                <div style="text-align:center;"><img src="https://img.icons8.com/color/48/folder-invoices.png"><br><span style="font-size:12px;">Projekty</span></div>
-                <div style="text-align:center;"><img src="https://img.icons8.com/color/48/image.png"><br><span style="font-size:12px;">Zdjęcia</span></div>
-            </div>
-        </div>
-    </div>
-
     <div class="window" id="musicWin" onclick="event.stopPropagation()">
         <div class="window-header" onmousedown="dragElement(this)">
             <span style="margin-left:10px;">YouTube Music</span>
@@ -139,26 +126,20 @@
 
     <div class="action-center" id="actionCenter" onclick="event.stopPropagation()">
         <div class="quick-settings">
-            <div class="setting-tile on">WiFi<br><small>Połączono</small></div>
-            <div class="setting-tile on">Bluetooth<br><small>Wł.</small></div>
+            <div class="setting-tile on">WiFi</div>
+            <div class="setting-tile on">Bluetooth</div>
             <div class="setting-tile">Tryb samolotowy</div>
-            <div class="setting-tile">Oszczędzanie</div>
-            <div class="setting-tile">Skupienie</div>
-            <div class="setting-tile">Nocne</div>
         </div>
         <div class="sliders">
-            <div class="slider-row"><span>🔆</span><input type="range" value="80"></div>
-            <div class="slider-row"><span>🔊</span><input type="range" value="50"></div>
+            <div class="slider-row"><span>🔆</span><input type="range"></div>
+            <div class="slider-row"><span>🔊</span><input type="range"></div>
         </div>
     </div>
 
     <div class="start-menu" id="startMenu" onclick="event.stopPropagation()">
-        <p style="font-weight:600; margin-bottom:20px;">Przypięte aplikacje</p>
+        <p style="font-weight:600; margin-bottom:20px;">Przypięte</p>
         <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:25px; text-align:center;">
-            <div onclick="openWin('explorerWin')" style="cursor:pointer;"><img src="https://img.icons8.com/color/48/folder-invoices.png" style="width:40px;"><br><span style="font-size:11px;">Pliki</span></div>
             <div onclick="openWin('musicWin')" style="cursor:pointer;"><img src="https://img.icons8.com/color/48/youtube-music.png" style="width:40px;"><br><span style="font-size:11px;">YT Music</span></div>
-            <div><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Microsoft_Edge_logo_%282019%29.svg/48px-Microsoft_Edge_logo_%282019%29.svg.png" style="width:40px;"><br><span style="font-size:11px;">Edge</span></div>
-            <div><img src="https://img.icons8.com/color/48/python.png" style="width:40px;"><br><span style="font-size:11px;">Python</span></div>
         </div>
         <img src="https://img.icons8.com/fluent-systems-filled/200/shutdown.jpg" onclick="shutdownSystem()" style="position:absolute; bottom:30px; right:35px; width:22px; cursor:pointer;">
     </div>
@@ -168,13 +149,12 @@
     <div style="width: 150px;"></div>
     <div class="taskbar-center">
         <img src="https://img.icons8.com/color/48/windows-11.png" onclick="toggleStart(event)">
-        <img src="https://img.icons8.com/color/48/folder-invoices.png" onclick="openWin('explorerWin')">
         <img src="https://img.icons8.com/color/48/youtube-music.png" onclick="openWin('musicWin')">
     </div>
     <div class="taskbar-right" onclick="toggleActionCenter(event)">
         <span style="font-size:16px;">📶 🔊</span>
-        <div style="text-align:right; font-size:11px; line-height:1.2; margin-left:10px;">
-            <span id="clock-time">15:30</span><br><span id="clock-date">08.04.2026</span>
+        <div style="text-align:right; font-size:11px; margin-left:10px;">
+            <span id="clock-time"></span><br><span id="clock-date"></span>
         </div>
     </div>
 </nav>
@@ -183,7 +163,19 @@
 
 <script>
     function startBooting() { setTimeout(() => { document.getElementById('boot-screen').style.display='none'; document.getElementById('login-screen').style.display='flex'; }, 2000); }
-    function login() { document.getElementById('login-screen').style.display='none'; document.getElementById('mainDesktop').style.display='block'; document.getElementById('taskbar').style.display='flex'; setInterval(updateClock, 1000); }
+    
+    function login() { 
+        document.getElementById('login-screen').style.display='none'; 
+        document.getElementById('mainDesktop').style.display='block'; 
+        document.getElementById('taskbar').style.display='flex'; 
+        
+        // ODGRYWANIE DŹWIĘKU STARTUP
+        const startup = document.getElementById('startupSound');
+        startup.volume = 0.5;
+        startup.play();
+
+        setInterval(updateClock, 1000); 
+    }
     
     function dragElement(header) {
         const win = header.parentElement;
@@ -195,16 +187,13 @@
     }
 
     function openWin(id) { 
-        const w = document.getElementById(id); 
-        w.style.display = 'flex'; 
+        const w = document.getElementById(id); w.style.display = 'flex'; 
         setTimeout(() => w.classList.add('active'), 10);
         closeAllPopups();
     }
 
     function closeWin(id) { 
-        const w = document.getElementById(id);
-        w.classList.add('closing');
-        w.classList.remove('active');
+        const w = document.getElementById(id); w.classList.add('closing'); w.classList.remove('active');
         setTimeout(() => { w.style.display = 'none'; w.classList.remove('closing'); }, 200);
         if(id==='musicWin') { document.getElementById('mAudio').pause(); document.getElementById('pBtn').innerText="▶"; }
     }
@@ -220,12 +209,7 @@
     }
 
     function shutdownSystem() { document.getElementById('shutdown-screen').style.display='flex'; setTimeout(() => document.getElementById('shutdown-screen').style.opacity = '1', 50); setTimeout(()=>location.reload(), 4000); }
-    
-    function updateClock() {
-        const n = new Date();
-        document.getElementById('clock-time').innerText = n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        document.getElementById('clock-date').innerText = n.toLocaleDateString();
-    }
+    function updateClock() { const n = new Date(); document.getElementById('clock-time').innerText = n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); document.getElementById('clock-date').innerText = n.toLocaleDateString(); }
 </script>
 </body>
 </html>
