@@ -215,6 +215,28 @@
 
     function shutdownSystem() { document.getElementById('shutdown-screen').style.display='flex'; setTimeout(() => document.getElementById('shutdown-screen').style.opacity = '1', 50); setTimeout(()=>location.reload(), 4000); }
     function updateClock() { const n = new Date(); document.getElementById('clock-time').innerText = n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); document.getElementById('clock-date').innerText = n.toLocaleDateString(); }
+
+    // Dodaj to do swojego skryptu:
+
+const brightnessSlider = document.querySelector('.slider-row:nth-child(1) input');
+const volumeSlider = document.querySelector('.slider-row:nth-child(2) input');
+const desktopOverlay = document.getElementById('mainDesktop');
+const bgMusic = document.getElementById('mAudio');
+const startupSound = document.getElementById('startupSound');
+
+// OBSŁUGA JASNOŚCI (Nakładanie filtra jasności na pulpit)
+brightnessSlider.addEventListener('input', (e) => {
+    const val = e.target.value;
+    // Zmieniamy jasność od 20% do 100%
+    desktopOverlay.style.filter = `brightness(${val}%)`;
+});
+
+// OBSŁUGA DŹWIĘKU (Sterowanie muzyką i dźwiękami systemowymi)
+volumeSlider.addEventListener('input', (e) => {
+    const vol = e.target.value / 100;
+    bgMusic.volume = vol;
+    startupSound.volume = vol;
+});
 </script>
 </body>
 </html>
