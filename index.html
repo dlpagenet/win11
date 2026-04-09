@@ -165,33 +165,22 @@
     function startBooting() { setTimeout(() => { document.getElementById('boot-screen').style.display='none'; document.getElementById('login-screen').style.display='flex'; }, 2000); }
     
     function login() { 
-    // Ukrywamy ekran logowania i pokazujemy pulpit
+    const startup = document.getElementById('startupSound');
+    
+    // Od razu przygotuj audio do odtworzenia
+    startup.load(); 
+    
     document.getElementById('login-screen').style.display='none'; 
     document.getElementById('mainDesktop').style.display='block'; 
     document.getElementById('taskbar').style.display='flex'; 
     
-    // POBIERAMY ELEMENT AUDIO
-    const startup = document.getElementById('startupSound');
-    
-    // RESETUJEMY I ODGRYWAMY (Interakcja kliknięcia "Zaloguj" pozwala na start)
-    startup.currentTime = 0; 
-    startup.volume = 0.5;
-    
-    // Próba odtworzenia z obsługą błędu w konsoli
-    startup.play().catch(error => {
-        console.log("Autoplay zablokowany lub błąd pliku:", error);
-    });
+    // Odtwarzanie z lekkim opóźnieniem, żeby system "odetchnął" po renderowaniu pulpitu
+    setTimeout(() => {
+        startup.play().catch(e => console.log("Czekam na interakcję..."));
+    }, 100);
 
     setInterval(updateClock, 1000); 
-} 
-        
-        // ODGRYWANIE DŹWIĘKU STARTUP
-        const startup = document.getElementById('startupSound');
-        startup.volume = 0.5;
-        startup.play();
-
-        setInterval(updateClock, 1000); 
-    }
+}
     
     function dragElement(header) {
         const win = header.parentElement;
